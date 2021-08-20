@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>解析</title>
+    <link href="./css/main.css" rel="stylesheet" type="text/css" />
+    <link href="./css/iconfont.css" rel="stylesheet" type="text/css" />
+    <link href="./css/test.css" rel="stylesheet" type="text/css" />
+    <style>
+        * {
+            padding: 0;
+            margin: 0;
+        }
+        
+        .tips_type {
+            color: red;
+        }
+        
+        .option>label {
+            display: inline-block;
+        }
+        
+        .option>label.active {
+            font-weight: 600;
+            color: #5d9cec;
+        }
+        
+        .test_content_nr {
+            padding-bottom: 50px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="main">
+        <!--nr start-->
+        <div class="test_main">
+            <div class="nr_left">
+                <div class="test">
+                    <form action="" method="post">
+                        <div class="test_content">
+                            <div class="test_content_title">
+                                <h2>题目列表</h2>
+                                <p>
+                                    <span>共</span><i class="content_lit danxuan_num">2</i><span>题</span>
+                                </p>
+                            </div>
+                        </div>
+                        <div class="test_content_nr">
+                            <ul id="danxuan_box">
+                                <!-- <li>
+                                    <div class="test_content_nr_tt">
+                                        <i>1</i><span class="tips_type">【多选】</span><span>(1分)</span>
+                                        <font>在生产管理信息系统中，下列操作步骤能正确将工单推进流程的是（ ）</font>
+                                    </div>
+                                    <div class="test_content_nr_main">
+                                        <ul>
+                                            <li class="option">
+                                                <label class="active">A.alskdfjlks</label>
+                                            </li>
+                                        </ul>
+                                        <div style="margin-top: 10px;">正确选项：D</div>
+                                    </div>
+                                </li> -->
+                            </ul>
+                        </div>
+
+                        <div>
+                            <div class="test_title">
+                                <p class="test_time">
+                                    <b class="alt-1 title_answer"></b>
+                                    <span style="margin:0 50px;">得分：<span class="start_time">10</span>分</span>
+                                    <span>准确率：<span class="right_num">2</span>/<span class="totalNum">10</span></span>
+                                </p>
+                                <font id="submit"><input type="button" name="test_jiaojuan" value="退出"></font>
+                            </div>
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="./jquery-1.11.3.min.js"></script>
+    <script src="./common.js"></script>
+    <script>
+        window.onload = function() {
+            jQuery.support.cors = true;
+            $.ajax({
+                url: request_url + 'answer-admin/web/policeselectanswer/showAnswerRes', //获取解析数据
+                method: 'get',
+                contentType: 'application/json;charset=UTF-8',
+                data: {
+                    policeNumber: JSON.parse(sessionStorage.getItem('userInfo')).policeNumber,
+                    currentTimeMillis: sessionStorage.getItem('currentTimeMillis')
+                },
+                success: function(res) {
+                    if (res.code == 0) {
+                        var arr = res.data;
+                        var html = '';
+                        $.each(arr, function(index, value) {
+                            var option_html = '';
+                            $.each(value.examTitleEntity.selectList, function(index2, value2) {
+                                var nowSelect_arr = value.nowSelectArr;
+                                var aaa = 0;
+                                $.each(nowSelect_arr, function(index3, value3) {
+                                    if (value3 == value2.selectNum) {
+                                        aaa += 1;
+                                    }
+                                })
+                                var bbb = aaa > 0 ? 'active' : '';
+                                option_html += '<li class="option"><label class="' + bbb + '">' + value2.selectNum + '.' + value2.selectContent + '</label></li>';
+                            })
+                            var tips_type = value.examTitleEntity.type == 0 ? '单选' : value.examTitleEntity.type == 1 ? '多选' : '判断题';
+                            var right_or_rough = value.isCorrect == 1 ? '<span style="color:#09F859">【回答正确】</span>' : '<span style="color:red">【回答错误】</span>';
+                            html += '<li><div class="test_content_nr_tt"><i>' + Number(index + 1) + '</i><span class="tips_type">【' + tips_type + '】</span><font>' + value.examTitleEntity.stem + '</font> </div><div class="test_content_nr_main"><ul>' + option_html + '</ul><div style="margin-top: 10px;">正确答案：' + value.examTitleEntity.answerEntity.answer + right_or_rough + '</div></div></li>';
+                        })
+                        $('#danxuan_box').append(html);
+                    } else {
+                        alert(res.msg);
+                    }
+                },
+                error: function(err) {
+                    alert(JSON.stringify(err));
+                }
+            })
+
+            var result = JSON.parse(sessionStorage.getItem('result'));
+            $('.start_time').text(result.nowScore);
+            $('.right_num').text(result.correctNum);
+            $('.totalNum').text(result.tolQNum);
+
+            // 退出按钮
+            $('#submit').click(function() {
+                location.href = './login.html'
+            })
+        }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>答题</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+        
+        #box {
+            background: url('./img/bg1.jpg') no-repeat;
+            background-size: 100%;
+        }
+        
+        .content {
+            width: 400px;
+            margin: 200px auto;
+        }
+        
+        .common_center {
+            width: 100%;
+            margin-bottom: 30px;
+        }
+        
+        .title {
+            color: #fff;
+            font-size: 28px;
+            text-align: center;
+            font-weight: 600;
+        }
+        
+        .input_box {
+            width: 100%;
+            height: 40px;
+            padding-left: 10px;
+            box-sizing: border-box;
+            background-color: #fff;
+            margin-bottom: 10px;
+        }
+        
+        .input_box>img {
+            width: 25px;
+            height: 25px;
+            position: relative;
+            top: 6px;
+        }
+        
+        input {
+            border: none;
+            width: 340px;
+            height: 100%;
+            line-height: 40px;
+            font-size: 18px;
+            padding-left: 10px;
+            position: relative;
+            outline: none;
+        }
+        
+        .login_btn {
+            width: 100%;
+            height: 40px;
+            line-height: 40px;
+            text-align: center;
+            color: #fff;
+            font-weight: 600;
+            background-color: #fa0909;
+        }
+        
+        .login_btn:hover {
+            cursor: pointer;
+            background-color: #fa0909;
+        }
+        
+        .update_pwd {
+            text-align: right;
+        }
+        
+        .update_pwd:hover {
+            cursor: pointer;
+            color: #D71617;
+        }
+    </style>
+</head>
+
+<body id="box">
+    <div class="content">
+        <p class="common_center title">教育整顿应知应会每日一测</p>
+        <div class="common_center ">
+            <div class="input_box">
+                <img src="./img/yonghu-fuben.png" alt="">
+                <input type="text" id="account" placeholder="请输入警号">
+            </div>
+            <div class="input_box">
+                <img src="./img/zu.png" alt="">
+                <input type="password" id="password" placeholder="请输入密码">
+            </div>
+        </div>
+        <div class="common_center login_btn">登录</div>
+    </div>
+
+    <script src="./jquery-1.11.3.min.js"></script>
+    <script src="./common.js"></script>
+    <script type="text/javascript">
+        window.onload = function() {
+            $('.login_btn').click(function() {
+                var account = $('#account').val();
+                var password = $('#password').val();
+                jQuery.support.cors = true;
+                $.ajax({
+                    url: request_url + 'answer-admin/web/answerpolice/loginAnswer',
+                    method: 'post',
+                    contentType: 'application/json;charset=UTF-8',
+                    data: JSON.stringify({
+                        "policeNumber": account,
+                        "password": password
+                    }),
+                    success: function(res) {
+                        if (res.code == 0) {
+                            sessionStorage.setItem('userInfo', JSON.stringify(res.user));
+                            sessionStorage.setItem('ifAnswer', res.ifAnswer);
+                            sessionStorage.setItem('iftime', res.iftime);
+                            window.location.href = './login_had.html';
+                        } else {
+                            alert(res.msg);
+                        }
+                    },
+                    error: function(err) {
+                        alert(JSON.stringify(err));
+                    }
+                })
+            });
+
+        }
+    </script>
+</body>
+
+</html>

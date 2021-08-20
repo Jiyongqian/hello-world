@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>答题</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+        
+        #box {
+            background-color: #eee;
+        }
+        
+        .content {
+            width: 400px;
+            margin: 200px auto;
+        }
+        
+        .common_center {
+            width: 100%;
+            margin-bottom: 30px;
+        }
+        
+        .title {
+            color: #D71617;
+            font-size: 28px;
+            text-align: center;
+            font-weight: 600;
+        }
+        
+        .input_box {
+            width: 100%;
+            height: 40px;
+            padding-left: 10px;
+            box-sizing: border-box;
+            background-color: #fff;
+            margin-bottom: 10px;
+        }
+        
+        .input_box>span {
+            display: inline-block;
+            width: 70px;
+        }
+        
+        input {
+            border: none;
+            width: 300px;
+            height: 100%;
+            line-height: 40px;
+            font-size: 18px;
+            padding-left: 10px;
+            box-sizing: border-box;
+            position: relative;
+            outline: none;
+        }
+        
+        .login_btn {
+            width: 100%;
+            height: 40px;
+            line-height: 40px;
+            text-align: center;
+            color: #fff;
+            font-weight: 600;
+            background-color: #D71617;
+        }
+        
+        .login_btn:hover {
+            cursor: pointer;
+            background-color: #fa0909;
+        }
+        
+        .update_pwd {
+            text-align: right;
+        }
+        
+        .update_pwd:hover {
+            cursor: pointer;
+            color: #D71617;
+        }
+    </style>
+</head>
+
+<body id="box">
+    <div class="content">
+        <p class="common_center title">修改密码</p>
+        <div class="common_center ">
+            <div class="input_box">
+                <span>原始密码</span>
+                <input type="password" id="password" placeholder="请输入原始密码">
+            </div>
+            <div class="input_box">
+                <span>新密码</span>
+                <input type="password" id="new_pwd" placeholder="请输入新密码">
+            </div>
+        </div>
+        <div class="common_center login_btn">修改</div>
+    </div>
+
+    <script src="./jquery-1.11.3.min.js"></script>
+    <script src="./common.js"></script>
+    <script type="text/javascript">
+        window.onload = function() {
+            var userInfo = JSON.parse(sessionStorage.getItem('userInfo'));
+            $('.login_btn').click(function() {
+                var password = $('#password').val();
+                var new_pwd = $('#new_pwd').val();
+                jQuery.support.cors = true;
+                $.ajax({
+                    url: request_url + 'answer-admin/web/answerpolice/updatePwd',
+                    method: 'post',
+                    contentType: 'application/json;charset=UTF-8',
+                    data: JSON.stringify({  
+                        "userId": userInfo.id,
+                        "password": password,
+                        "newPassword": new_pwd
+                    }),
+                    success: function(res) {
+                        if (res.code == 0) {
+                            window.location.href = './login.html';
+                        } else {
+                            alert(res.msg);
+                        }
+                    },
+                    error: function(err) {
+                        alert(JSON.stringify(err));
+                    }
+                })
+            });
+
+        }
+    </script>
+</body>
+
+</html>

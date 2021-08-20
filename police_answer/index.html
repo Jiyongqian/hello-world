@@ -1,0 +1,326 @@
+﻿<!DOCTYPE HTML>
+<html>
+
+<head>
+    <meta http-equiv="content-type" content="text/html;charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>答题</title>
+    <link href="./css/main.css" rel="stylesheet" type="text/css" />
+    <link href="./css/iconfont.css" rel="stylesheet" type="text/css" />
+    <link href="./css/test.css" rel="stylesheet" type="text/css" />
+
+    <style>
+        p {
+            display: inline-block;
+        }
+        
+        .hasBeenAnswer {
+            background: #5d9cec;
+            color: #fff;
+        }
+    </style>
+</head>
+
+<body id="box">
+    <div class="main" style="padding-top: 45px;">
+        <!--nr start-->
+        <div class="test_main">
+            <div class="nr_left">
+                <div class="test">
+                    <form action="" method="post">
+                        <div class="test_content">
+                            <div class="test_content_title">
+                                <h2>单选题</h2>
+                                <p>
+                                    <span>共</span><i class="content_lit danxuan_num"></i><span>题</span>
+                                </p>
+                            </div>
+                        </div>
+                        <div class="test_content_nr">
+                            <ul id="danxuan_box"></ul>
+                        </div>
+
+                        <div>
+                            <div class="test_content">
+                                <div class="test_content_title">
+                                    <h2>多选题</h2>
+                                    <p><span>共</span><i class="content_lit duoxuanNum"></i><span>题</span>
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="test_content_nr">
+                                <ul id="duoxuan_box"></ul>
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="test_content">
+                                <div class="test_content_title">
+                                    <h2>判断题</h2>
+                                    <p><span>共</span><i class="content_lit panduanNum"></i><span>题</span>
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="test_content_nr">
+                                <ul id="panduan_box"></ul>
+                            </div>
+
+                        </div>
+
+                        <div>
+                            <div class="test_title" style="top: 0;">
+                                <p class="test_time">
+                                    <b class="alt-1 title_answer"></b>
+                                    <span style="margin:0 50px;">开始时间：<span class="start_time"></span></span>
+                                    <span>结束时间：<span class="end_time"></span></span>
+                                </p>
+                                <font class='username'>李明</font>
+                            </div>
+                            <div class="test_title">
+                                <p class="test_time">
+                                    <b class="alt-1 timer"></b>
+                                </p>
+                                <font id="submit"><input type="button" name="test_jiaojuan" value="交卷"></font>
+                            </div>
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+        </div>
+        <!--nr end-->
+        <div class="foot"></div>
+    </div>
+
+    <script src="./jquery-1.11.3.min.js"></script>
+    <script src="./common.js"></script>
+
+    <script>
+        window.onload = function() {
+            var time = 0;
+            var timer = null;
+            var actData = {};
+            var currentTimeMillis = '';
+            jQuery.support.cors = true;
+            $.ajax({
+                url: request_url + 'answer-admin/web/examtitle/randomExamOrderByType',
+                method: 'get',
+                contentType: 'application/json;charset=UTF-8',
+                success: function(res) {
+                    if (res.code == 0) {
+                        actData = res.data.actData;
+                        currentTimeMillis = res.data.currentTimeMillis;
+                        sessionStorage.setItem('currentTimeMillis', currentTimeMillis);
+                        $('.title_answer').text(actData.name);
+                        $('.start_time').text(actData.startTime);
+                        $('.end_time').text(actData.endTime);
+
+                        var danxuan_arr = res.data.danxuanTitleData;
+                        var duoxuan_arr = res.data.duoxuanTitleData;
+                        var panduan_arr = res.data.panduanTitleData;
+                        $('.danxuan_num').text(danxuan_arr.length);
+                        $('.duoxuanNum').text(duoxuan_arr.length);
+                        $('.panduanNum').text(panduan_arr.length);
+
+                        var html = '';
+                        var checkbox_html = '';
+                        var panduan_html = '';
+                        $.each(danxuan_arr, function(index, value) {
+                            var option_arr = value.selectList;
+                            var option_html = '';
+                            $.each(option_arr, function(idx, val) {
+                                option_html += '<li class="option"><input type="radio" class="radioOrCheck" value="' + value.id + '_' + value.number + '_' + value.titleScore + '|' + val.selectNum + '" name="answer' + Number(index + 1) + '"id="answer_' + Number(index + 1) + '_option_' + Number(idx + 1) + '" /><label for="answer_' + Number(index + 1) + '_option_' + Number(idx + 1) + '">' + val.selectNum + '.' + val.selectContent + '</label></li>';
+                            })
+                            html += '<li id="qu_0_0"><div class="test_content_nr_tt"><i>' + Number(index + 1) + '</i><span>(' + value.titleScore + '分)</span><font>' + value.stem + '</font></div><div class="test_content_nr_main"><ul>' + option_html + '</ul></div> </li>';
+                        })
+                        $.each(duoxuan_arr, function(index, value) {
+                            var option_arr = value.selectList;
+                            var option_html = '';
+                            $.each(option_arr, function(idx, val) {
+                                option_html += '<li class="option"><input type="checkbox" class="radioOrCheck" value="' + value.id + '_' + value.number + '_' + value.titleScore + '|' + val.selectNum + '" name="checkbox' + Number(index + 1) + '"id="checkbox_' + Number(index + 1) + '_option_' + Number(idx + 1) + '" /><label for="checkbox_' + Number(index + 1) + '_option_' + Number(idx + 1) + '">' + val.selectNum + '.' + val.selectContent + '</label></li>';
+                            })
+                            checkbox_html += '<li><div class="test_content_nr_tt"><i>' + Number(index + 1) + '</i><span>(' + value.titleScore + '分)</span><font>' + value.stem + '</font></div><div class="test_content_nr_main"><ul>' + option_html + '</ul></div> </li>';
+                        });
+                        $.each(panduan_arr, function(index, value) {
+                            var option_arr = value.selectList;
+                            var option_html = '';
+                            $.each(option_arr, function(idx, val) {
+                                option_html += '<li class="option"><input type="radio" class="radioOrCheck" value="' + value.id + '_' + value.number + '_' + value.titleScore + '|' + val.selectNum + '" name="panduan' + Number(index + 1) + '"id="panduan_' + Number(index + 1) + '_option_' + Number(idx + 1) + '" /><label for="panduan_' + Number(index + 1) + '_option_' + Number(idx + 1) + '">' + val.selectNum + '.' + val.selectContent + '</label></li>';
+                            })
+                            panduan_html += '<li><div class="test_content_nr_tt"><i>' + Number(index + 1) + '</i><span>(' + value.titleScore + '分)</span><font>' + value.stem + '</font></div><div class="test_content_nr_main"><ul>' + option_html + '</ul></div> </li>';
+                        });
+                        $('#danxuan_box').append(html);
+                        $('#duoxuan_box').append(checkbox_html);
+                        $('#panduan_box').append(panduan_html);
+
+                        time = actData.duration;
+                        $('.timer').text(time);
+                        timer = setInterval(function() {
+                            $('.timer').text(time);
+                            time -= 1;
+                        }, 1000)
+                    } else {
+                        alert(res.msg);
+                    }
+
+                },
+                error: function(err) {
+                    alert(JSON.stringify(err));
+                }
+            })
+
+            $('#submit').click(function() {
+                var arr = [];
+                $('#danxuan_box>li').each(function(index, dom) {
+                    var obj = {};
+                    var aaa = 'answer' + Number(index + 1);
+                    var bbb = $("input[name='" + aaa + "']").val();
+                    bbb = bbb.split('|')[0] + '|' + '';
+                    bbb = $("input[name='" + aaa + "']:checked").val() ? $("input[name='" + aaa + "']:checked").val() : bbb;
+                    obj.activityId = actData.id;
+                    obj.policeNumber = userInfo.policeNumber;
+                    obj.examTitleId = bbb.split('_')[0];
+                    obj.examTitleNumber = bbb.split('_')[1];
+                    obj.examTitleScore = bbb.split('_')[2].split('|')[0];
+                    obj.nowSelect = bbb.split('|')[1];
+                    obj.currentTimeMillis = currentTimeMillis;
+                    arr.push(obj);
+                })
+                $('#duoxuan_box>li').each(function(index, dom) {
+                    var obj = {};
+                    var aaa = 'checkbox' + Number(index + 1);
+                    var str = '';
+                    var bbb = $("input[name='" + aaa + "']").val();
+                    bbb = bbb.split('|')[0] + '|' + '';
+                    $("input[name='" + aaa + "']:checked").each(function() {
+                        str += $(this).val().split('|')[1];
+                    });
+                    bbb = bbb + '' + str;
+                    obj.activityId = actData.id;
+                    obj.policeNumber = userInfo.policeNumber;
+                    obj.examTitleId = bbb.split('_')[0];
+                    obj.examTitleNumber = bbb.split('_')[1];
+                    obj.examTitleScore = bbb.split('_')[2].split('|')[0];
+                    obj.nowSelect = bbb.split('|')[1];
+                    obj.currentTimeMillis = currentTimeMillis;
+                    arr.push(obj);
+                })
+                $('#panduan_box>li').each(function(index, dom) {
+                    var obj = {};
+                    var aaa = 'panduan' + Number(index + 1);
+                    var bbb = $("input[name='" + aaa + "']").val();
+                    bbb = bbb.split('|')[0] + '|' + '';
+                    bbb = $("input[name='" + aaa + "']:checked").val() ? $("input[name='" + aaa + "']:checked").val() : bbb;
+                    obj.activityId = actData.id;
+                    obj.policeNumber = userInfo.policeNumber;
+                    obj.examTitleId = bbb.split('_')[0];
+                    obj.examTitleNumber = bbb.split('_')[1];
+                    obj.examTitleScore = bbb.split('_')[2].split('|')[0];
+                    obj.nowSelect = bbb.split('|')[1];
+                    obj.currentTimeMillis = currentTimeMillis;
+                    arr.push(obj);
+                })
+                $.ajax({
+                    url: request_url + 'answer-admin/web/policeselectanswer/checkAnswer',
+                    method: 'post',
+                    contentType: 'application/json;charset=UTF-8',
+                    data: JSON.stringify(arr),
+                    success: function(res) {
+                        console.log(res);
+                        if (res.code == 0) {
+                            sessionStorage.setItem('result', JSON.stringify(res.data));
+                            window.location.href = './result.html';
+                        } else {
+                            alert(res.msg);
+                        }
+                    },
+                    error: function(err) {
+                        alert(JSON.stringify(err));
+                    }
+                })
+            })
+
+            var timer2 = setInterval(function() {
+                if (time == 0) {
+                    clearInterval(timer);
+                    var arr = [];
+                    $('#danxuan_box>li').each(function(index, dom) {
+                        var obj = {};
+                        var aaa = 'answer' + Number(index + 1);
+                        var bbb = $("input[name='" + aaa + "']").val();
+                        bbb = bbb.split('|')[0] + '|' + '';
+                        bbb = $("input[name='" + aaa + "']:checked").val() ? $("input[name='" + aaa + "']:checked").val() : bbb;
+                        obj.activityId = actData.id;
+                        obj.policeNumber = userInfo.policeNumber;
+                        obj.examTitleId = bbb.split('_')[0];
+                        obj.examTitleNumber = bbb.split('_')[1];
+                        obj.examTitleScore = bbb.split('_')[2].split('|')[0];
+                        obj.nowSelect = bbb.split('|')[1];
+                        arr.push(obj);
+                    })
+                    $('#duoxuan_box>li').each(function(index, dom) {
+                        var obj = {};
+                        var aaa = 'checkbox' + Number(index + 1);
+                        var str = '';
+                        var bbb = $("input[name='" + aaa + "']").val();
+                        bbb = bbb.split('|')[0] + '|' + '';
+                        $("input[name='" + aaa + "']:checked").each(function() {
+                            str += $(this).val().split('|')[1];
+                        });
+                        bbb = bbb + '' + str;
+                        obj.activityId = actData.id;
+                        obj.policeNumber = userInfo.policeNumber;
+                        obj.examTitleId = bbb.split('_')[0];
+                        obj.examTitleNumber = bbb.split('_')[1];
+                        obj.examTitleScore = bbb.split('_')[2].split('|')[0];
+                        obj.nowSelect = bbb.split('|')[1];
+                        arr.push(obj);
+                    })
+                    $('#panduan_box>li').each(function(index, dom) {
+                        var obj = {};
+                        var aaa = 'panduan' + Number(index + 1);
+                        var bbb = $("input[name='" + aaa + "']").val();
+                        bbb = bbb.split('|')[0] + '|' + '';
+                        bbb = $("input[name='" + aaa + "']:checked").val() ? $("input[name='" + aaa + "']:checked").val() : bbb;
+                        obj.activityId = actData.id;
+                        obj.policeNumber = userInfo.policeNumber;
+                        obj.examTitleId = bbb.split('_')[0];
+                        obj.examTitleNumber = bbb.split('_')[1];
+                        obj.examTitleScore = bbb.split('_')[2].split('|')[0];
+                        obj.nowSelect = bbb.split('|')[1];
+                        arr.push(obj);
+                    })
+                    $.ajax({
+                        url: request_url + 'answer-admin/web/policeselectanswer/checkAnswer',
+                        method: 'post',
+                        contentType: 'application/json;charset=UTF-8',
+                        data: JSON.stringify(arr),
+                        success: function(res) {
+                            console.log(res);
+                            if (res.code == 0) {
+                                sessionStorage.setItem('result', JSON.stringify(res.data));
+                                window.location.href = './result.html';
+                            } else {
+                                alert(res.msg);
+                            }
+                        },
+                        error: function(err) {
+                            alert(JSON.stringify(err));
+                        }
+                    })
+                    clearInterval(timer2);
+                }
+            }, 1000)
+
+            var userInfo = sessionStorage.getItem('userInfo') ? JSON.parse(sessionStorage.getItem('userInfo')) : {
+                policeNumber: '***'
+            };
+            $('.username').text(userInfo.policeNumber);
+
+        }
+    </script>
+
+
+</body>
+
+</html>
